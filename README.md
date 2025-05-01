@@ -1,6 +1,6 @@
 ## 🧩 UI Library
 ```
-local UILib = loadstring(game:HttpGet("https://github.com/EnemySaga/EnemySagaUI"))()
+local UILib = loadstring(game:HttpGet("https://raw.githubusercontent.com/EnemySaga/EnemySagaUI/refs/heads/main/Library"))()
 local Window = UILib:Create("My Script Hub")
 ```
 ## 🧩 Notification
