@@ -5,7 +5,7 @@ local LocalPlayer = game:GetService("Players").LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local HttpService = game:GetService("HttpService")
 
-local EnemySaga = {
+local EnemySagaLib = {
 	Elements = {},
 	ThemeObjects = {},
 	Connections = {},
@@ -44,53 +44,53 @@ local function GetIcon(IconName)
 	end
 end   
 
-local Enemy = Instance.new("ScreenGui")
-Enemy.Name = "Enemy"
+local EnemySaga = Instance.new("ScreenGui")
+EnemySaga.Name = "EnemySaga"
 if syn then
-	syn.protect_gui(Enemy)
-	Enemy.Parent = game.CoreGui
+	syn.protect_gui(EnemySaga)
+	EnemySaga.Parent = game.CoreGui
 else
-	Enemy.Parent = gethui() or game.CoreGui
+	EnemySaga.Parent = gethui() or game.CoreGui
 end
 
 if gethui then
 	for _, Interface in ipairs(gethui():GetChildren()) do
-		if Interface.Name == Enemy.Name and Interface ~= Enemy then
+		if Interface.Name == EnemySaga.Name and Interface ~= EnemySaga then
 			Interface:Destroy()
 		end
 	end
 else
 	for _, Interface in ipairs(game.CoreGui:GetChildren()) do
-		if Interface.Name == Enemy.Name and Interface ~= Enemy then
+		if Interface.Name == EnemySaga.Name and Interface ~= EnemySaga then
 			Interface:Destroy()
 		end
 	end
 end
 
-function EnemySaga:IsRunning()
+function EnemySagaLib:IsRunning()
 	if gethui then
-		return Enemy.Parent == gethui()
+		return EnemySaga.Parent == gethui()
 	else
-		return Enemy.Parent == game:GetService("CoreGui")
+		return EnemySaga.Parent == game:GetService("CoreGui")
 	end
 
 end
 
 local function AddConnection(Signal, Function)
-	if (not EnemySaga:IsRunning()) then
+	if (not EnemySagaLib:IsRunning()) then
 		return
 	end
 	local SignalConnect = Signal:Connect(Function)
-	table.insert(EnemySaga.Connections, SignalConnect)
+	table.insert(EnemySagaLib.Connections, SignalConnect)
 	return SignalConnect
 end
 
 task.spawn(function()
-	while (EnemySaga:IsRunning()) do
+	while (EnemySagaLib:IsRunning()) do
 		wait()
 	end
 
-	for _, Connection in next, EnemySaga.Connections do
+	for _, Connection in next, EnemySagaLib.Connections do
 		Connection:Disconnect()
 	end
 end)
@@ -137,13 +137,13 @@ local function Create(Name, Properties, Children)
 end
 
 local function CreateElement(ElementName, ElementFunction)
-	EnemySaga.Elements[ElementName] = function(...)
+	EnemySagaLib.Elements[ElementName] = function(...)
 		return ElementFunction(...)
 	end
 end
 
 local function MakeElement(ElementName, ...)
-	local NewElement = EnemySaga.Elements[ElementName](...)
+	local NewElement = EnemySagaLib.Elements[ElementName](...)
 	return NewElement
 end
 
@@ -186,18 +186,18 @@ local function ReturnProperty(Object)
 end
 
 local function AddThemeObject(Object, Type)
-	if not EnemySaga.ThemeObjects[Type] then
-		EnemySaga.ThemeObjects[Type] = {}
+	if not EnemySagaLib.ThemeObjects[Type] then
+		EnemySagaLib.ThemeObjects[Type] = {}
 	end    
-	table.insert(EnemySaga.ThemeObjects[Type], Object)
-	Object[ReturnProperty(Object)] = EnemySaga.Themes[EnemySaga.SelectedTheme][Type]
+	table.insert(EnemySagaLib.ThemeObjects[Type], Object)
+	Object[ReturnProperty(Object)] = EnemySagaLib.Themes[EnemySagaLib.SelectedTheme][Type]
 	return Object
 end    
 
 local function SetTheme()
-	for Name, Type in pairs(EnemySaga.ThemeObjects) do
+	for Name, Type in pairs(EnemySagaLib.ThemeObjects) do
 		for _, Object in pairs(Type) do
-			Object[ReturnProperty(Object)] = EnemySaga.Themes[EnemySaga.SelectedTheme][Name]
+			Object[ReturnProperty(Object)] = EnemySagaLib.Themes[EnemySagaLib.SelectedTheme][Name]
 		end    
 	end    
 end
@@ -213,12 +213,12 @@ end
 local function LoadCfg(Config)
 	local Data = HttpService:JSONDecode(Config)
 	table.foreach(Data, function(a,b)
-		if EnemySaga.Flags[a] then
+		if EnemySagaLib.Flags[a] then
 			spawn(function() 
-				if EnemySaga.Flags[a].Type == "Colorpicker" then
-					EnemySaga.Flags[a]:Set(UnpackColor(b))
+				if EnemySagaLib.Flags[a].Type == "Colorpicker" then
+					EnemySagaLib.Flags[a]:Set(UnpackColor(b))
 				else
-					EnemySaga.Flags[a]:Set(b)
+					EnemySagaLib.Flags[a]:Set(b)
 				end    
 			end)
 		else
@@ -229,7 +229,7 @@ end
 
 local function SaveCfg(Name)
 	local Data = {}
-	for i,v in pairs(EnemySaga.Flags) do
+	for i,v in pairs(EnemySagaLib.Flags) do
 		if v.Save then
 			if v.Type == "Colorpicker" then
 				Data[i] = PackColor(v.Value)
@@ -238,7 +238,7 @@ local function SaveCfg(Name)
 			end
 		end	
 	end
-	writefile(EnemySaga.Folder .. "/" .. Name .. ".txt", tostring(HttpService:JSONEncode(Data)))
+	writefile(EnemySagaLib.Folder .. "/" .. Name .. ".txt", tostring(HttpService:JSONEncode(Data)))
 end
 
 local WhitelistedMouse = {Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2,Enum.UserInputType.MouseButton3}
@@ -382,10 +382,10 @@ local NotificationHolder = SetProps(SetChildren(MakeElement("TFrame"), {
 	Position = UDim2.new(1, -25, 1, -25),
 	Size = UDim2.new(0, 300, 1, -25),
 	AnchorPoint = Vector2.new(1, 1),
-	Parent = Enemy
+	Parent = EnemySaga
 })
 
-function EnemySaga:MakeNotification(NotificationConfig)
+function EnemySagaLib:MakeNotification(NotificationConfig)
 	spawn(function()
 		NotificationConfig.Name = NotificationConfig.Name or "Notification"
 		NotificationConfig.Content = NotificationConfig.Content or "Test"
@@ -446,12 +446,12 @@ function EnemySaga:MakeNotification(NotificationConfig)
 	end)
 end    
 
-function EnemySaga:Init()
-	if EnemySaga.SaveCfg then	
+function EnemySagaLib:Init()
+	if EnemySagaLib.SaveCfg then	
 		pcall(function()
-			if isfile(EnemySaga.Folder .. "/" .. game.GameId .. ".txt") then
-				LoadCfg(readfile(EnemySaga.Folder .. "/" .. game.GameId .. ".txt"))
-				EnemySaga:MakeNotification({
+			if isfile(EnemySagaLib.Folder .. "/" .. game.GameId .. ".txt") then
+				LoadCfg(readfile(EnemySagaLib.Folder .. "/" .. game.GameId .. ".txt"))
+				EnemySagaLib:MakeNotification({
 					Name = "Configuration",
 					Content = "Auto-loaded configuration for the game " .. game.GameId .. ".",
 					Time = 5
@@ -461,7 +461,7 @@ function EnemySaga:Init()
 	end	
 end	
 
-function EnemySaga:MakeWindow(WindowConfig)
+function EnemySagaLib:MakeWindow(WindowConfig)
 	local FirstTab = true
 	local Minimized = false
 	local Loaded = false
@@ -480,8 +480,8 @@ function EnemySaga:MakeWindow(WindowConfig)
 	WindowConfig.ShowIcon = WindowConfig.ShowIcon or false
 	WindowConfig.Icon = WindowConfig.Icon or "rbxassetid://8834748103"
 	WindowConfig.IntroIcon = WindowConfig.IntroIcon or "rbxassetid://8834748103"
-	EnemySaga.Folder = WindowConfig.ConfigFolder
-	EnemySaga.SaveCfg = WindowConfig.SaveConfig
+	EnemySagaLib.Folder = WindowConfig.ConfigFolder
+	EnemySagaLib.SaveCfg = WindowConfig.SaveConfig
 
 	if WindowConfig.SaveConfig then
 		if not isfolder(WindowConfig.ConfigFolder) then
@@ -598,7 +598,7 @@ function EnemySaga:MakeWindow(WindowConfig)
 	}), "Stroke")
 
 	local MainWindow = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 10), {
-		Parent = Enemy,
+		Parent = EnemySaga,
 		Position = UDim2.new(0.5, -307, 0.5, -172),
 		Size = UDim2.new(0, 615, 0, 344),
 		ClipsDescendants = true
@@ -647,7 +647,7 @@ function EnemySaga:MakeWindow(WindowConfig)
 	AddConnection(CloseBtn.MouseButton1Up, function()
 		MainWindow.Visible = false
 		UIHidden = true
-		EnemySaga:MakeNotification({
+		EnemySagaLib:MakeNotification({
 			Name = "Interface Hidden",
 			Content = "Tap RightShift to reopen the interface",
 			Time = 5
@@ -697,7 +697,7 @@ function EnemySaga:MakeWindow(WindowConfig)
 	local function LoadSequence()
 		MainWindow.Visible = false
 		local LoadSequenceLogo = SetProps(MakeElement("Image", WindowConfig.IntroIcon), {
-			Parent = Enemy,
+			Parent = EnemySaga,
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.new(0.5, 0, 0.4, 0),
 			Size = UDim2.new(0, 28, 0, 28),
@@ -706,7 +706,7 @@ function EnemySaga:MakeWindow(WindowConfig)
 		})
 
 		local LoadSequenceText = SetProps(MakeElement("Label", WindowConfig.IntroText, 14), {
-			Parent = Enemy,
+			Parent = EnemySaga,
 			Size = UDim2.new(1, 0, 1, 0),
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.new(0.5, 19, 0.5, 0),
@@ -896,22 +896,22 @@ function EnemySaga:MakeWindow(WindowConfig)
 				}), "Second")
 
 				AddConnection(Click.MouseEnter, function()
-					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySaga.Themes[EnemySaga.SelectedTheme].Second.R * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.G * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.B * 255 + 3)}):Play()
+					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.R * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.G * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 				end)
 
 				AddConnection(Click.MouseLeave, function()
-					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = EnemySaga.Themes[EnemySaga.SelectedTheme].Second}):Play()
+					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second}):Play()
 				end)
 
 				AddConnection(Click.MouseButton1Up, function()
-					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySaga.Themes[EnemySaga.SelectedTheme].Second.R * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.G * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.B * 255 + 3)}):Play()
+					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.R * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.G * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 					spawn(function()
 						ButtonConfig.Callback()
 					end)
 				end)
 
 				AddConnection(Click.MouseButton1Down, function()
-					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySaga.Themes[EnemySaga.SelectedTheme].Second.R * 255 + 6, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.G * 255 + 6, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.B * 255 + 6)}):Play()
+					TweenService:Create(ButtonFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.R * 255 + 6, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.G * 255 + 6, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.B * 255 + 6)}):Play()
 				end)
 
 				function Button:Set(ButtonText)
@@ -971,8 +971,8 @@ function EnemySaga:MakeWindow(WindowConfig)
 
 				function Toggle:Set(Value)
 					Toggle.Value = Value
-					TweenService:Create(ToggleBox, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Toggle.Value and ToggleConfig.Color or EnemySaga.Themes.Default.Divider}):Play()
-					TweenService:Create(ToggleBox.Stroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = Toggle.Value and ToggleConfig.Color or EnemySaga.Themes.Default.Stroke}):Play()
+					TweenService:Create(ToggleBox, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Toggle.Value and ToggleConfig.Color or EnemySagaLib.Themes.Default.Divider}):Play()
+					TweenService:Create(ToggleBox.Stroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = Toggle.Value and ToggleConfig.Color or EnemySagaLib.Themes.Default.Stroke}):Play()
 					TweenService:Create(ToggleBox.Ico, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = Toggle.Value and 0 or 1, Size = Toggle.Value and UDim2.new(0, 20, 0, 20) or UDim2.new(0, 8, 0, 8)}):Play()
 					ToggleConfig.Callback(Toggle.Value)
 				end    
@@ -980,25 +980,25 @@ function EnemySaga:MakeWindow(WindowConfig)
 				Toggle:Set(Toggle.Value)
 
 				AddConnection(Click.MouseEnter, function()
-					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySaga.Themes[EnemySaga.SelectedTheme].Second.R * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.G * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.B * 255 + 3)}):Play()
+					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.R * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.G * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 				end)
 
 				AddConnection(Click.MouseLeave, function()
-					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = EnemySaga.Themes[EnemySaga.SelectedTheme].Second}):Play()
+					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second}):Play()
 				end)
 
 				AddConnection(Click.MouseButton1Up, function()
-					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySaga.Themes[EnemySaga.SelectedTheme].Second.R * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.G * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.B * 255 + 3)}):Play()
+					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.R * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.G * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 					SaveCfg(game.GameId)
 					Toggle:Set(not Toggle.Value)
 				end)
 
 				AddConnection(Click.MouseButton1Down, function()
-					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySaga.Themes[EnemySaga.SelectedTheme].Second.R * 255 + 6, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.G * 255 + 6, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.B * 255 + 6)}):Play()
+					TweenService:Create(ToggleFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.R * 255 + 6, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.G * 255 + 6, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.B * 255 + 6)}):Play()
 				end)
 
 				if ToggleConfig.Flag then
-					EnemySaga.Flags[ToggleConfig.Flag] = Toggle
+					EnemySagaLib.Flags[ToggleConfig.Flag] = Toggle
 				end	
 				return Toggle
 			end  
@@ -1093,7 +1093,7 @@ function EnemySaga:MakeWindow(WindowConfig)
 
 				Slider:Set(Slider.Value)
 				if SliderConfig.Flag then				
-					EnemySaga.Flags[SliderConfig.Flag] = Slider
+					EnemySagaLib.Flags[SliderConfig.Flag] = Slider
 				end
 				return Slider
 			end  
@@ -1248,7 +1248,7 @@ function EnemySaga:MakeWindow(WindowConfig)
 				Dropdown:Refresh(Dropdown.Options, false)
 				Dropdown:Set(Dropdown.Value)
 				if DropdownConfig.Flag then				
-					EnemySaga.Flags[DropdownConfig.Flag] = Dropdown
+					EnemySagaLib.Flags[DropdownConfig.Flag] = Dropdown
 				end
 				return Dropdown
 			end
@@ -1346,19 +1346,19 @@ function EnemySaga:MakeWindow(WindowConfig)
 				end)
 
 				AddConnection(Click.MouseEnter, function()
-					TweenService:Create(BindFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySaga.Themes[EnemySaga.SelectedTheme].Second.R * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.G * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.B * 255 + 3)}):Play()
+					TweenService:Create(BindFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.R * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.G * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 				end)
 
 				AddConnection(Click.MouseLeave, function()
-					TweenService:Create(BindFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = EnemySaga.Themes[EnemySaga.SelectedTheme].Second}):Play()
+					TweenService:Create(BindFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second}):Play()
 				end)
 
 				AddConnection(Click.MouseButton1Up, function()
-					TweenService:Create(BindFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySaga.Themes[EnemySaga.SelectedTheme].Second.R * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.G * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.B * 255 + 3)}):Play()
+					TweenService:Create(BindFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.R * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.G * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 				end)
 
 				AddConnection(Click.MouseButton1Down, function()
-					TweenService:Create(BindFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySaga.Themes[EnemySaga.SelectedTheme].Second.R * 255 + 6, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.G * 255 + 6, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.B * 255 + 6)}):Play()
+					TweenService:Create(BindFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.R * 255 + 6, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.G * 255 + 6, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.B * 255 + 6)}):Play()
 				end)
 
 				function Bind:Set(Key)
@@ -1370,7 +1370,7 @@ function EnemySaga:MakeWindow(WindowConfig)
 
 				Bind:Set(BindConfig.Default)
 				if BindConfig.Flag then				
-					EnemySaga.Flags[BindConfig.Flag] = Bind
+					EnemySagaLib.Flags[BindConfig.Flag] = Bind
 				end
 				return Bind
 			end  
@@ -1437,20 +1437,20 @@ function EnemySaga:MakeWindow(WindowConfig)
 				TextboxActual.Text = TextboxConfig.Default
 
 				AddConnection(Click.MouseEnter, function()
-					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySaga.Themes[EnemySaga.SelectedTheme].Second.R * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.G * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.B * 255 + 3)}):Play()
+					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.R * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.G * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 				end)
 
 				AddConnection(Click.MouseLeave, function()
-					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = EnemySaga.Themes[EnemySaga.SelectedTheme].Second}):Play()
+					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second}):Play()
 				end)
 
 				AddConnection(Click.MouseButton1Up, function()
-					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySaga.Themes[EnemySaga.SelectedTheme].Second.R * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.G * 255 + 3, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.B * 255 + 3)}):Play()
+					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.R * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.G * 255 + 3, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.B * 255 + 3)}):Play()
 					TextboxActual:CaptureFocus()
 				end)
 
 				AddConnection(Click.MouseButton1Down, function()
-					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySaga.Themes[EnemySaga.SelectedTheme].Second.R * 255 + 6, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.G * 255 + 6, EnemySaga.Themes[EnemySaga.SelectedTheme].Second.B * 255 + 6)}):Play()
+					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.R * 255 + 6, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.G * 255 + 6, EnemySagaLib.Themes[EnemySagaLib.SelectedTheme].Second.B * 255 + 6)}):Play()
 				end)
 			end 
 			function ElementFunction:AddColorpicker(ColorpickerConfig)
@@ -1634,7 +1634,7 @@ function EnemySaga:MakeWindow(WindowConfig)
 
 				Colorpicker:Set(Colorpicker.Value)
 				if ColorpickerConfig.Flag then				
-					EnemySaga.Flags[ColorpickerConfig.Flag] = Colorpicker
+					EnemySagaLib.Flags[ColorpickerConfig.Flag] = Colorpicker
 				end
 				return Colorpicker
 			end  
@@ -1721,7 +1721,7 @@ function EnemySaga:MakeWindow(WindowConfig)
 		return ElementFunction   
 	end  
 	
-	EnemySaga:MakeNotification({
+	EnemySagaLib:MakeNotification({
 		Name = "UI Library Upgrade",
 		Content = "New UI Library Available at sirius.menu/discord and sirius.menu/rayfield",
 		Time = 5
@@ -1730,38 +1730,16 @@ function EnemySaga:MakeWindow(WindowConfig)
 	return TabFunction
 end   
 
-function EnemySaga:Destroy()
-	Enemy:Destroy()
+function EnemySagaLib:Destroy()
+	EnemySaga:Destroy()
 end
 
-Enemy.AncestryChanged:Connect(function()
-    if not EnemySaga:IsRunning() then
-        for _, Connection in next, EnemySaga.Connections do
+EnemySaga.AncestryChanged:Connect(function()
+    if not EnemySagaLib:IsRunning() then
+        for _, Connection in next, EnemySagaLib.Connections do
             Connection:Disconnect()
         end
     end
 end)
 
-local FloatingIcon = Instance.new("ImageButton")
-FloatingIcon.Name = "FloatingIcon"
-FloatingIcon.Image = WindowConfig.Icon or "rbxassetid://8834748103"
-FloatingIcon.Size = UDim2.new(0, 48, 0, 48)
-FloatingIcon.Position = UDim2.new(1, -60, 1, -60)
-FloatingIcon.AnchorPoint = Vector2.new(1, 1)
-FloatingIcon.BackgroundTransparency = 1
-FloatingIcon.Visible = false
-FloatingIcon.Parent = Enemy
-
--- Optional: Add a drop shadow or corner
-local FloatingCorner = Instance.new("UICorner")
-FloatingCorner.CornerRadius = UDim.new(1, 0)
-FloatingCorner.Parent = FloatingIcon
-
--- Show UI when floating icon is clicked
-FloatingIcon.MouseButton1Click:Connect(function()
-    MainWindow.Visible = true
-    FloatingIcon.Visible = false
-    Minimized = false
-end)
-
-return EnemySaga
+return EnemySagaLib
