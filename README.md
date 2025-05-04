@@ -1,16 +1,16 @@
 # EnemySaga Library
-This documentation is for the stable release of Orion Library.
+This documentation is for the stable release of EnemySaga Library.
 
 ## Booting the Library
 ```lua
-local EnemySaga = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
+local EnemySaga = loadstring(game:HttpGet(('https://raw.githubusercontent.com/EnemySaga/EnemySagaUI/refs/heads/main/Library')))()
 ```
 
 
 
 ## Creating a Window
 ```lua
-local Window = EnemySaga:MakeWindow({Name = "Title of the library", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+local Window = EnemySaga:MakeWindow({Name = "Title of the library", HidePremium = false, SaveConfig = true, ConfigFolder = "EnemySagaTest"})
 
 --[[
 Name = <string> - The name of the UI.
