@@ -670,16 +670,6 @@ function EnemySagaLib:MakeWindow(WindowConfig)
 			MainWindow.ClipsDescendants = false
 			WindowStuff.Visible = true
 			WindowTopBarLine.Visible = true
-			FloatingIcon.Visible = false
-			-- Restore icons if needed
-			for _, obj in ipairs(MainWindow:GetDescendants()) do
-				if (obj:IsA("ImageLabel") or obj:IsA("ImageButton")) and obj.Name ~= "" then
-					local icon = GetIcon(obj.Name)
-					if icon then
-						obj.Image = icon
-					end
-				end
-			end
 		else
 			-- Minimize UI
 			MainWindow.ClipsDescendants = true
@@ -687,9 +677,7 @@ function EnemySagaLib:MakeWindow(WindowConfig)
 			MinimizeBtn.Ico.Image = "rbxassetid://7072720870"
 			TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, WindowName.TextBounds.X + 140, 0, 50)}):Play()
 			wait(0.1)
-			WindowStuff.Visible = false
-			FloatingIcon.Visible = true
-			MainWindow.Visible = false
+			WindowStuff.Visible = false	
 		end
 		Minimized = not Minimized    
 	end)
